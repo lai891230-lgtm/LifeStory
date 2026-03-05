@@ -1,6 +1,6 @@
 {
     "name": "LifeStory",
-    "short_name": "Life",
+    "short_name": "LifeStory",
     "description": "A minimalist timeline for your life events.",
     "start_url": "./index.html",
     "display": "standalone",
