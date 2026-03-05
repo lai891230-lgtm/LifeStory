@@ -1,0 +1,126 @@
+/* === HORIZONTAL LIFE BATTERY (Design A) === */
+
+/* Container Layout */
+/* Container Layout */
+.life-battery-container {
+    position: relative;
+    width: 100%;
+    height: 40px;
+    margin-top: 15px;
+    margin-bottom: 0px;
+    padding: 0;
+    background-color: transparent;
+    cursor: pointer;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    z-index: 20;
+    flex-shrink: 0;
+}
+
+/* The Track (Future - Empty, Visible) */
+.battery-track {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 100%;
+    margin: 0;
+    /* Darker grey + Inset Shadow for Visibility */
+    background-color: #e0e0e0;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+    border-radius: 20px;
+    transform: translateY(-50%);
+    overflow: hidden;
+    /* Clips the fill */
+    border: none;
+}
+
+/* The Fill Left (Past - Solid/Classic Navy) */
+.battery-fill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 0%;
+    background: #2c3e50;
+    transition: width 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* Current Day Highlight */
+.battery-fill::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: rgba(255, 255, 255, 0.5);
+}
+
+/* The Needle (Navigation Pointer) */
+.battery-needle {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background-color: #d32f2f;
+    left: 0%;
+    transform: translateX(-50%);
+    pointer-events: none;
+    z-index: 22;
+    transition: left 0.1s linear;
+}
+
+.battery-needle::before {
+    display: none;
+    /* Remove triangle, use just line */
+}
+
+/* Hover/Drag Floating Label (Now floats ABOVE to not block search) */
+.battery-label {
+    position: absolute;
+    /* Move up and shrink to prevent blocking */
+    top: 5px;
+    left: 0;
+    transform: translateX(-50%);
+    background-color: var(--ink-primary);
+    color: #fff;
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s, top 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    z-index: 101;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.battery-label.visible {
+    opacity: 1;
+    /* Pop up nicely */
+    top: -38px;
+}
+
+/* Add a tiny downward triangle tail to the tooltip */
+.battery-label::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 5px 5px 0;
+    border-style: solid;
+    border-color: var(--ink-primary) transparent transparent transparent;
+}
+
+/* Ticks */
+.battery-track::after {
+    content: '';
+    position: absolute;
+
+    /* Ticks removed per user request */
+    .battery-track::after {
+        display: none;
+    }
