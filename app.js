@@ -1396,3 +1396,48 @@ function renderMultiTrack() {
   streamLane.appendChild(streamBody);
   multitrackContent.appendChild(streamLane);
 }
+
+/* =========================================
+   PINCH TO ZOOM FOR MULTITRACK VIEW
+   ========================================= */
+let currentZoom = 1;
+let initialPinchDistance = null;
+let initialZoom = 1;
+
+if (multitrackContent) {
+  multitrackContent.addEventListener('touchstart', (e) => {
+    if (e.touches.length === 2) {
+      initialPinchDistance = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY
+      );
+      initialZoom = currentZoom;
+    }
+  }, { passive: false });
+
+  multitrackContent.addEventListener('touchmove', (e) => {
+    if (e.touches.length === 2 && initialPinchDistance !== null) {
+      e.preventDefault(); // Prevent native page zoom
+      const currentDistance = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY
+      );
+      const scale = currentDistance / initialPinchDistance;
+      let newZoom = initialZoom * scale;
+
+      // Clamp the zoom (0.3x for ultra-wide view, 2x for zooming in)
+      newZoom = Math.max(0.3, Math.min(newZoom, 2.0));
+      currentZoom = newZoom;
+
+      // Apply CSS zoom property (Webkit/Blink standard for physical scaling)
+      multitrackContent.style.zoom = currentZoom;
+    }
+  }, { passive: false });
+
+  multitrackContent.addEventListener('touchend', (e) => {
+    if (e.touches.length < 2) {
+      initialPinchDistance = null;
+    }
+  });
+}
+
