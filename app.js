@@ -116,6 +116,42 @@ const btnTimeCapsuleNext = document.getElementById('btn-time-capsule-next');
 const elTimeCapsuleTitle = document.getElementById('time-capsule-title');
 const elTimeCapsuleCard = document.getElementById('time-capsule-card');
 
+// --- Text Date Auto-formatter (YYYY-MM-DD) ---
+function setupDateAutoFormat(input) {
+  if (!input) return;
+  input.addEventListener('input', (e) => {
+    // Let the user delete freely without aggressive formatting
+    if (e.inputType === 'deleteContentBackward' || e.inputType === 'deleteContentForward') return;
+
+    const originalValue = input.value;
+    let val = originalValue.replace(/\D/g, ''); // only keep digits
+    if (val.length > 8) val = val.substring(0, 8);
+
+    let formatted = '';
+    // Format YYYY
+    if (val.length > 0) formatted = val.substring(0, 4);
+    // Format -MM
+    if (val.length >= 5) formatted += '-' + val.substring(4, 6);
+    // Format -DD
+    if (val.length >= 7) formatted += '-' + val.substring(6, 8);
+
+    // Allow user to manually type the hyphen at boundaries if they want to
+    if (val.length === 4 && originalValue.endsWith('-')) {
+      formatted += '-';
+    }
+    if (val.length === 6 && originalValue.endsWith('-')) {
+      formatted += '-';
+    }
+
+    // Only update if something fundamentally transformed
+    if (originalValue !== formatted) {
+      input.value = formatted;
+    }
+  });
+}
+
+[inpDate, inpEndDate, inpSettingsBirthdate, inpOnboardingBirthdate].forEach(setupDateAutoFormat);
+
 /* =========================================
    LIFE BATTERY SYSTEM (Horizontal Top Bar)
    ========================================= */

@@ -436,6 +436,45 @@ textarea {
   flex: 1;
 }
 
+.hybrid-date-wrapper {
+  display: flex;
+  position: relative;
+  align-items: center;
+  width: 100%;
+}
+
+.hybrid-date-wrapper input[type="text"] {
+  flex: 1;
+  padding-right: 45px;
+}
+
+.picker-container {
+  position: absolute;
+  right: 5px;
+  width: 35px;
+  height: 35px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.picker-container span {
+  font-size: 1.2rem;
+  pointer-events: none;
+}
+
+.picker-container input[type="date"] {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
 .checkbox-group {
   display: flex;
   align-items: center;
@@ -783,5 +822,6 @@ textarea {
 
 [data-theme="dark"] .btn-secondary:hover {
   background: #444;
- 
- }
+
+     
+}
