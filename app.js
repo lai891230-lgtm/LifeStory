@@ -860,6 +860,51 @@ function renderFullScreenList(list, title) {
 if (btnCloseListView) btnCloseListView.addEventListener('click', () => elFullListView.classList.remove('open'));
 
 /* Backup/Reset */
+if (btnExport) {
+  btnExport.addEventListener('click', () => {
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({
+      events,
+      tags,
+      tagOrder,
+      savedBirthDate
+    }));
+    const downloadAnchorNode = document.createElement('a');
+    downloadAnchorNode.setAttribute("href", dataStr);
+    downloadAnchorNode.setAttribute("download", "life_timeline_backup.json");
+    document.body.appendChild(downloadAnchorNode); // required for firefox
+    downloadAnchorNode.click();
+    downloadAnchorNode.remove();
+  });
+}
+
+if (btnImportTrigger && fileImport) {
+  btnImportTrigger.addEventListener('click', () => fileImport.click());
+
+  fileImport.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const data = JSON.parse(e.target.result);
+        if (data.events) localStorage.setItem('timeline_events', JSON.stringify(data.events));
+        if (data.tags) localStorage.setItem('timeline_tags', JSON.stringify(data.tags));
+        if (data.tagOrder) localStorage.setItem('timeline_tagOrder', JSON.stringify(data.tagOrder));
+        if (data.savedBirthDate) localStorage.setItem('timeline_birthdate', data.savedBirthDate);
+
+        alert('資料匯入成功！即將重新載入頁面。');
+        location.reload();
+      } catch (err) {
+        alert('匯入失敗：檔案格式不正確');
+        console.error(err);
+      }
+    };
+    reader.readAsText(file);
+    fileImport.value = ''; // Reset input
+  });
+}
+
 if (btnResetData) btnResetData.addEventListener('click', () => {
   if (confirm('確定要徹底刪除所有資料並重置嗎？')) {
     localStorage.clear();
