@@ -444,8 +444,7 @@ if (btnDelete) btnDelete.addEventListener('click', () => {
   const id = parseInt(inpId.value);
   events = events.filter(e => e.id !== id);
   saveEvents();
-  renderTimeline();
-  if (viewMultiTrack && viewMultiTrack.classList.contains('open')) renderMultiTrack();
+  if (typeof viewMultiTrack !== 'undefined' && viewMultiTrack && viewMultiTrack.classList.contains('open')) renderMultiTrack();
   closeModal();
 });
 
@@ -453,7 +452,7 @@ inpIsPeriod.addEventListener('change', () => {
   groupEndDate.style.display = inpIsPeriod.checked ? 'block' : 'none';
 });
 
-/* Modal Open Logic */
+/** LifeStory App logic **/
 function openModal(evt = null) {
   renderTagOptions();
   modal.classList.add('open');
@@ -505,16 +504,6 @@ function renderTagOptions() {
       const row = document.createElement('div');
       row.className = 'filter-row';
       row.dataset.key = key;
-      row.draggable = true;
-
-      row.addEventListener('dragstart', (e) => {
-        e.dataTransfer.setData('text/plain', key);
-        row.classList.add('dragging');
-      });
-
-      row.addEventListener('dragend', () => {
-        row.classList.remove('dragging');
-      });
 
       const chip = document.createElement('div');
       chip.className = 'filter-tag-chip';
@@ -531,56 +520,59 @@ function renderTagOptions() {
         tags[key].isMain = ['academic', 'work', 'love'].includes(key);
       }
 
+      const actionsDiv = document.createElement('div');
+      actionsDiv.className = 'tag-actions-group';
+
+      // Perfectly Centered Solid Thick Arrows (12.5 height centered in 24 viewBox)
+      const svgUp = `<svg style="width:18px;height:18px" viewBox="0 0 24 24"><path d="M13,18.25V10.25H16.5L12,5.75L7.5,10.25H11V18.25H13Z" fill="currentColor"/></svg>`;
+      const svgDown = `<svg style="width:18px;height:18px" viewBox="0 0 24 24"><path d="M11,5.75V13.75H7.5L12,18.25L16.5,13.75H13V5.75H11Z" fill="currentColor"/></svg>`;
+     const svgTrash = `<svg style="width:20px;height:20px" viewBox="0 0 24 24"><path d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19V4M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z" fill="#ff3b30"/></svg>`;
+
+      const btnUp = document.createElement('button');
+      btnUp.innerHTML = svgUp;
+      btnUp.className = 'btn-order-arrow';
+      btnUp.title = '上移';
+      btnUp.onclick = (e) => {
+        e.stopPropagation();
+        const idx = tagOrder.indexOf(key);
+        if (idx > 0) {
+          [tagOrder[idx], tagOrder[idx - 1]] = [tagOrder[idx - 1], tagOrder[idx]];
+          saveTagOrder();
+          renderTagOptions();
+          renderMultiTrack();
+        }
+      };
+
+      const btnDown = document.createElement('button');
+      btnDown.innerHTML = svgDown;
+      btnDown.className = 'btn-order-arrow';
+      btnDown.title = '下移';
+      btnDown.onclick = (e) => {
+        e.stopPropagation();
+        const idx = tagOrder.indexOf(key);
+        if (idx < tagOrder.length - 1) {
+          [tagOrder[idx], tagOrder[idx + 1]] = [tagOrder[idx + 1], tagOrder[idx]];
+          saveTagOrder();
+          renderTagOptions();
+          renderMultiTrack();
+        }
+      };
+
       const btnDel = document.createElement('button');
-      btnDel.textContent = '🗑️';
-      btnDel.className = 'btn-order';
+      btnDel.innerHTML = svgTrash;
+      btnDel.className = 'btn-delete-tag-icon'; 
+      btnDel.style.color = '#ff3b30'; // Explicitly set to red
       btnDel.onclick = (e) => { e.stopPropagation(); deleteTag(key); };
 
+      actionsDiv.appendChild(btnUp);
+      actionsDiv.appendChild(btnDown);
+      actionsDiv.appendChild(btnDel);
+
       row.appendChild(chip);
-      row.appendChild(btnDel);
+      row.appendChild(actionsDiv);
       filterListContainer.appendChild(row);
     }
   });
-
-  if (filterListContainer) {
-    filterListContainer.addEventListener('dragover', (e) => {
-      e.preventDefault();
-      const afterElement = getDragAfterElement(filterListContainer, e.clientY);
-      const draggable = document.querySelector('.dragging');
-      if (draggable) {
-        if (afterElement == null) {
-          filterListContainer.appendChild(draggable);
-        } else {
-          filterListContainer.insertBefore(draggable, afterElement);
-        }
-      }
-    });
-
-    filterListContainer.addEventListener('drop', (e) => {
-      e.preventDefault();
-      const newOrder = [];
-      filterListContainer.querySelectorAll('.filter-row').forEach(row => {
-        newOrder.push(row.dataset.key);
-      });
-      tagOrder = newOrder;
-      saveTagOrder();
-      renderMultiTrack(); // Refresh multi-track when order changes
-    });
-  }
-}
-
-function getDragAfterElement(container, y) {
-  const draggableElements = [...container.querySelectorAll('.filter-row:not(.dragging)')];
-
-  return draggableElements.reduce((closest, child) => {
-    const box = child.getBoundingClientRect();
-    const offset = y - box.top - box.height / 2;
-    if (offset < 0 && offset > closest.offset) {
-      return { offset: offset, element: child };
-    } else {
-      return closest;
-    }
-  }, { offset: Number.NEGATIVE_INFINITY }).element;
 }
 
 function openFilteredListView(tagKey) {
@@ -952,7 +944,7 @@ function renderMultiTrackControls() {
   if (!controlsDiv) return;
   controlsDiv.innerHTML = '<span style="font-size: 0.9rem; color: #555; margin-right: 8px;">顯示軌道：</span>';
 
-  tagOrder.forEach(key => {
+  tagOrder.forEach((key) => {
     if (key === 'other' || !tags[key]) return;
 
     // Migrate existing keys if isMain is undefined
@@ -967,14 +959,16 @@ function renderMultiTrackControls() {
     btn.onclick = () => {
       tags[key].isMain = !tags[key].isMain;
       saveTags();
-      renderTagOptions(); // sync background state
-      renderTimeline();   // refresh main timeline list
-      renderMultiTrack(); // redraw view
+      renderTagOptions();
+      renderTimeline();
+      renderMultiTrack();
     };
 
     controlsDiv.appendChild(btn);
   });
 }
+
+
 
 function renderMultiTrack() {
   renderMultiTrackControls();

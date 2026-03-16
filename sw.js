@@ -1,4 +1,6 @@
-const CACHE_NAME = 'life-timeline-v1';
+const CACHE_NAME = 'life-timeline-v18'; // Dashboard functionality restored
+console.log('LifeStory App Version: 16.0');
+console.log('SW v5: Activating force clear...');
 const ASSETS_TO_CACHE = [
     './',
     './index.html',
@@ -13,6 +15,7 @@ const ASSETS_TO_CACHE = [
 
 // Install event
 self.addEventListener('install', (event) => {
+    self.skipWaiting(); // Force the waiting service worker to become the active service worker
     event.waitUntil(
         caches.open(CACHE_NAME).then((cache) => {
             return cache.addAll(ASSETS_TO_CACHE);
@@ -29,17 +32,17 @@ self.addEventListener('fetch', (event) => {
     );
 });
 
-// Activate event (clean up old caches)
+// Activate event (clean up ALL old caches)
 self.addEventListener('activate', (event) => {
     event.waitUntil(
         caches.keys().then((cacheNames) => {
             return Promise.all(
                 cacheNames.map((cache) => {
-                    if (cache !== CACHE_NAME) {
-                        return caches.delete(cache);
-                    }
+                    // CAUTION: Clearing all caches to force update
+                    return caches.delete(cache);
                 })
-            );
+            ).then(() => self.clients.claim());
         })
     );
 });
+
